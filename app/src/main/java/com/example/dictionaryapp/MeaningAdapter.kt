@@ -8,12 +8,14 @@ import com.example.dictionaryapp.databinding.MeaningRecyclerRowBinding
 class MeaningAdapter(private var meaningList : List<Meaning>) : RecyclerView.Adapter<MeaningAdapter.MeaningViewHolder>()  {
 
     class MeaningViewHolder( private  val binding: MeaningRecyclerRowBinding) : RecyclerView.ViewHolder(binding.root){
-
+        fun bind(meaning: Meaning){
+            binding.partOfSpeechTextview.text = meaning.partOfSpeech
+        }
     }
-
 
     fun updateNewData(newMeaningList : List<Meaning>){
         meaningList = newMeaningList
+        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MeaningViewHolder {
@@ -26,6 +28,6 @@ class MeaningAdapter(private var meaningList : List<Meaning>) : RecyclerView.Ada
     }
 
     override fun onBindViewHolder(holder: MeaningViewHolder, position: Int) {
-
+        holder.bind(meaningList[position])
     }
 }
