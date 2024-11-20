@@ -2,7 +2,9 @@ package com.example.dictionaryapp
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.dictionaryapp.databinding.ActivityMainBinding
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -21,24 +23,40 @@ class MainActivity : AppCompatActivity() {
             val word = binding.searchInput.text.toString()
             getMeaning(word)
         }
-    }
-    private fun setUI(response: WordResult) {
-        binding.wordTextview.text = response.word
-        binding.phoneticTextview.text = response.phonetic
+
+        adapter = MeaningAdapter(emptyList())
+        binding.meaningRecyclerView.layoutManager = LinearLayoutManager(this)
+        binding.meaningRecyclerView.adapter = adapter
+
     }
 
     private fun getMeaning(word: String) {
         setInProgress(true)
         GlobalScope.launch {
-            val response = RetrofitInstance.dictionaryApi.getMeaning(word)
-            runOnUiThread {
-                setInProgress(false)
-                response.body()?.first()?.let {
-                    setUI(it)
+            try {
+                val response = RetrofitInstance.dictionaryApi.getMeaning(word)
+                if(response.body() == null){
+                    throw (Exception())
+                }
+                runOnUiThread {
+                    setInProgress(false)
+                    response.body()?.first()?.let {
+                        setUI(it)
+                    }
+                }
+            }catch (e : Exception){
+                runOnUiThread {
+                    setInProgress(false)
+                    Toast.makeText(applicationContext,"Something went wrong", Toast.LENGTH_SHORT).show()
                 }
             }
         }
+    }
 
+    private fun setUI(response: WordResult) {
+        binding.wordTextview.text = response.word
+        binding.phoneticTextview.text = response.phonetic
+        adapter.updateNewData(response.meanings)
     }
 
     private fun setInProgress(inProgress: Boolean) {
